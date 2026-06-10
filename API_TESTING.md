@@ -412,3 +412,136 @@ curl -s http://localhost:8000/api/v1/expenses/<OTHER_USER_EXPENSE_ID>/ \
 ```
 
 Expected: `404` — `"Expense not found."` (ownership enforced via queryset — no 403 leakage)
+
+---
+
+## Analytics
+
+All analytics endpoints require a Bearer token. All amounts are string-encoded
+decimals. Chart.js-ready `labels` / `data` arrays are included alongside `raw`
+detail so the frontend can use either.
+
+---
+
+### Summary (dashboard cards)
+
+```bash
+curl -s "http://localhost:8000/api/v1/analytics/summary/?month=2026-06" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+Omit `?month` to default to the current calendar month.
+
+Expected: `200`
+```json
+{
+  "data": {
+    "month": "2026-06",
+    "total_spent": "1412.50",
+    "total_spent_last_month": "410.00",
+    "month_over_month_change": "244.5",
+    "total_expenses_count": 5,
+    "top_category": { "name": "Housing", "color": "#45B7D1", "icon": "home", "amount": "1200.00" },
+    "recent_expenses": [ ...5 expense objects... ]
+  }
+}
+```
+
+---
+
+### Category breakdown (Pie / Doughnut chart)
+
+```bash
+# Current month
+curl -s "http://localhost:8000/api/v1/analytics/category-breakdown/?date_from=2026-06-01&date_to=2026-06-30" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+# All time (omit both dates)
+curl -s "http://localhost:8000/api/v1/analytics/category-breakdown/" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+Expected: `200`
+```json
+{
+  "data": {
+    "labels": ["Housing", "Food & Dining", "Transport"],
+    "background_colors": ["#45B7D1", "#FF6B6B", "#4ECDC4"],
+    "amounts": [1200.0, 150.0, 62.5],
+    "total": "1412.50",
+    "breakdown": [
+      { "category_name": "Housing", "amount": "1200.00", "percentage": "85.0", "count": 1 },
+      { "category_name": "Food & Dining", "amount": "150.00", "percentage": "10.6", "count": 2 },
+      { "category_name": "Transport", "amount": "62.50", "percentage": "4.4", "count": 2 }
+    ]
+  }
+}
+```
+
+Chart.js usage:
+```js
+{ labels: data.labels, datasets: [{ data: data.amounts, backgroundColor: data.background_colors }] }
+```
+
+---
+
+### Monthly trend (Line chart)
+
+```bash
+# Last 6 months (default)
+curl -s "http://localhost:8000/api/v1/analytics/monthly-trend/" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+# Last 12 months
+curl -s "http://localhost:8000/api/v1/analytics/monthly-trend/?months=12" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+
+`months` accepts 1–24. Months with zero spending are included as `0.0`
+so Chart.js renders a continuous line without gaps.
+
+Expected: `200`
+```json
+{
+  "data": {
+    "labels": ["2026-04", "2026-05", "2026-06"],
+    "data": [1200.0, 410.0, 1412.5],
+    "months_requested": 3,
+    "trend": [
+      { "month": "2026-04", "total": "1200.00", "count": 1 },
+      { "month": "2026-05", "total": "410.00",  "count": 2 },
+      { "month": "2026-06", "total": "1412.50", "count": 5 }
+    ]
+  }
+}
+```
+
+Chart.js usage:
+```js
+{ labels: data.labels, datasets: [{ label: "Monthly Spending", data: data.data }] }
+```
+
+---
+
+### Analytics error cases
+
+#### Invalid month format
+```bash
+curl -s "http://localhost:8000/api/v1/analytics/summary/?month=June-2026" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+Expected: `400` — `"Invalid query parameters."`
+
+#### date_from after date_to
+```bash
+curl -s "http://localhost:8000/api/v1/analytics/category-breakdown/?date_from=2026-12-01&date_to=2026-01-01" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+Expected: `400` — `"date_from must be before date_to."`
+
+#### months out of range
+```bash
+curl -s "http://localhost:8000/api/v1/analytics/monthly-trend/?months=99" \
+  -H "Authorization: Bearer <ACCESS_TOKEN>"
+```
+Expected: `400` — validation error (max 24).
