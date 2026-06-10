@@ -2,6 +2,10 @@ from .base import *  # noqa
 
 DEBUG = False
 
+# Render terminates SSL at its load balancer and forwards X-Forwarded-Proto.
+# Without this, SECURE_SSL_REDIRECT sees every request as HTTP and loops forever.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # Security headers
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
