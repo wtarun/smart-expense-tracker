@@ -1,5 +1,5 @@
 import AddIcon from '@mui/icons-material/Add'
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import { useCallback, useEffect, useState } from 'react'
 import expensesApi from '../../api/expensesApi'
 import ConfirmDialog from '../../components/common/ConfirmDialog'
@@ -82,8 +82,7 @@ export default function ExpensesPage() {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h5" fontWeight={700}>Expenses</Typography>
+      <Box display="flex" justifyContent="flex-start" mb={5} sx={{paddingBottom: 3}}>
         <Button variant="contained" startIcon={<AddIcon />} onClick={openAdd}>Add Expense</Button>
       </Box>
 

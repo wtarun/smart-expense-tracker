@@ -1,3 +1,5 @@
+import datetime
+
 from rest_framework import serializers
 from apps.categories.serializers import CategorySerializer
 from .models import Expense
@@ -45,6 +47,11 @@ class ExpenseWriteSerializer(serializers.ModelSerializer):
             "payment_method": {"required": False},
             "notes":          {"required": False},
         }
+
+    def validate_expense_date(self, value):
+        if value > datetime.date.today():
+            raise serializers.ValidationError("Expense date cannot be in the future.")
+        return value
 
     def validate_amount(self, value):
         if value <= 0:

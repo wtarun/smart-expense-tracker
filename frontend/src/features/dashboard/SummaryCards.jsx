@@ -30,7 +30,8 @@ function StatCard({ icon, label, value, sub, subColor, loading }) {
 }
 
 export default function SummaryCards({ summary, loading }) {
-  const mom = summary?.month_over_month_change ?? 0
+  // API returns a string ("26.5") or the literal "None" when no prior month exists
+  const mom = parseFloat(summary?.month_over_month_change) || 0
   const momColor = mom > 0 ? 'error.main' : 'success.main'
   const momLabel = `${mom > 0 ? '+' : ''}${mom.toFixed(1)}% vs last month`
 
@@ -39,7 +40,7 @@ export default function SummaryCards({ summary, loading }) {
       <StatCard
         icon={<AccountBalanceWalletIcon />}
         label="Spent This Month"
-        value={formatCurrency(summary?.total_spent_this_month)}
+        value={formatCurrency(summary?.total_spent)}
         sub={momLabel}
         subColor={momColor}
         loading={loading}

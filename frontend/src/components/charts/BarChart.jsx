@@ -9,7 +9,7 @@ export default function CategoryBarChart({ data }) {
   // Sort descending by amount, cap at top 8 to keep the chart readable
   const sorted = [...data].sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount)).slice(0, 8)
 
-  const labels = sorted.map((d) => d.category)
+  const labels = sorted.map((d) => d.category_name)
   const values = sorted.map((d) => parseFloat(d.amount))
 
   const chartData = {

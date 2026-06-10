@@ -16,15 +16,14 @@ function currentMonth() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 }
 
-function monthRange(monthsBack) {
-  const to = new Date()
-  const from = new Date()
-  from.setMonth(from.getMonth() - monthsBack + 1)
-  from.setDate(1)
-  return {
-    date_from: from.toISOString().split('T')[0],
-    date_to:   to.toISOString().split('T')[0],
-  }
+// Returns first and last day of the current month so the breakdown
+// matches the summary period and includes future-dated expenses within the month.
+function currentMonthRange() {
+  const now = new Date()
+  const first = new Date(now.getFullYear(), now.getMonth(), 1)
+  const last  = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  const fmt = (d) => d.toISOString().split('T')[0]
+  return { date_from: fmt(first), date_to: fmt(last) }
 }
 
 export default function DashboardPage() {
@@ -38,7 +37,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const month = currentMonth()
-    const range = monthRange(6)
+    const range = currentMonthRange()
 
     Promise.all([
       analyticsApi.summary({ month }),
@@ -47,8 +46,10 @@ export default function DashboardPage() {
     ])
       .then(([summaryRes, breakdownRes, trendRes]) => {
         setSummary(summaryRes.data.data)
-        setBreakdown(breakdownRes.data.data ?? [])
-        setTrend(trendRes.data.data ?? [])
+        // API returns { breakdown: [...], labels, amounts, ... } — extract the array
+        setBreakdown(breakdownRes.data.data?.breakdown ?? [])
+        // API returns { trend: [...], labels, data, ... } — extract the array
+        setTrend(trendRes.data.data?.trend ?? [])
       })
       .catch(() => notify('Failed to load dashboard data', 'error'))
       .finally(() => setLoading(false))
@@ -60,7 +61,7 @@ export default function DashboardPage() {
   return (
     <Box>
       {/* Header */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} sx={{paddingBottom: 3}}>
         <Box>
           <Typography variant="h5" fontWeight={700}>Dashboard</Typography>
           <Typography variant="body2" color="text.secondary">

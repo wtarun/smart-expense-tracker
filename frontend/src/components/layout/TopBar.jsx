@@ -1,7 +1,7 @@
 import LogoutIcon from '@mui/icons-material/Logout'
 import MenuIcon from '@mui/icons-material/Menu'
 import {
-  AppBar, Avatar, Box, IconButton, Toolbar, Tooltip, Typography,
+  AppBar, Avatar, Box, Button, IconButton, Toolbar, Typography,
 } from '@mui/material'
 import useAuth from '../../hooks/useAuth'
 import { DRAWER_WIDTH } from './Sidebar'
@@ -23,6 +23,7 @@ export default function TopBar({ onMenuClick, title }) {
       }}
     >
       <Toolbar>
+        {/* Mobile hamburger */}
         <IconButton edge="start" onClick={onMenuClick} sx={{ mr: 2, display: { md: 'none' } }}>
           <MenuIcon />
         </IconButton>
@@ -31,18 +32,28 @@ export default function TopBar({ onMenuClick, title }) {
           {title}
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Avatar sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontSize: 14 }}>
             {user?.first_name?.[0]?.toUpperCase() ?? 'U'}
           </Avatar>
+
           <Typography variant="body2" sx={{ display: { xs: 'none', sm: 'block' } }}>
             {user?.first_name} {user?.last_name}
           </Typography>
-          <Tooltip title="Logout">
-            <IconButton onClick={logout} size="small">
-              <LogoutIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+
+          {/* Sign out — text label on sm+, icon-only on mobile */}
+          <Button
+            onClick={logout}
+            color="error"
+            size="small"
+            startIcon={<LogoutIcon />}
+            sx={{ display: { xs: 'none', sm: 'flex' }, textTransform: 'none', fontWeight: 600 }}
+          >
+            Sign out
+          </Button>
+          <IconButton onClick={logout} color="error" size="small" sx={{ display: { xs: 'flex', sm: 'none' } }}>
+            <LogoutIcon />
+          </IconButton>
         </Box>
       </Toolbar>
     </AppBar>

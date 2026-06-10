@@ -1,8 +1,7 @@
-import {
-  Box, Grid, InputAdornment, MenuItem,
-  TextField,
-} from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
+import {
+  Box, InputAdornment, MenuItem, TextField,
+} from '@mui/material'
 import { useEffect, useState } from 'react'
 import categoriesApi from '../../api/categoriesApi'
 
@@ -25,40 +24,79 @@ export default function ExpenseFilters({ filters, onChange }) {
   const set = (key) => (e) => onChange({ ...filters, [key]: e.target.value })
 
   return (
-    <Box sx={{ mb: 2 }}>
-      <Grid container spacing={2} alignItems="center">
-        <Grid item xs={12} sm={4}>
-          <TextField
-            size="small"
-            placeholder="Search title or notes…"
-            fullWidth
-            value={filters.search ?? ''}
-            onChange={set('search')}
-            InputProps={{ startAdornment: <InputAdornment position="start"><SearchIcon fontSize="small" /></InputAdornment> }}
-          />
-        </Grid>
+    <Box
+      sx={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        gap: 1.5,
+        mb: 2,
+        alignItems: 'center',
+      }}
+    >
+      {/* Search — grows to fill available space */}
+      <TextField
+        size="small"
+        placeholder="Search title or notes…"
+        value={filters.search ?? ''}
+        onChange={set('search')}
+        sx={{ flex: '1 1 200px', minWidth: 160 }}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
 
-        <Grid item xs={6} sm={2}>
-          <TextField size="small" label="From" type="date" fullWidth InputLabelProps={{ shrink: true }} value={filters.date_from ?? ''} onChange={set('date_from')} />
-        </Grid>
+      {/* Date from */}
+      <TextField
+        size="small"
+        label="From"
+        type="date"
+        value={filters.date_from ?? ''}
+        onChange={set('date_from')}
+        sx={{ flex: '0 0 148px' }}
+        slotProps={{ inputLabel: { shrink: true } }}
+      />
 
-        <Grid item xs={6} sm={2}>
-          <TextField size="small" label="To" type="date" fullWidth InputLabelProps={{ shrink: true }} value={filters.date_to ?? ''} onChange={set('date_to')} />
-        </Grid>
+      {/* Date to */}
+      <TextField
+        size="small"
+        label="To"
+        type="date"
+        value={filters.date_to ?? ''}
+        onChange={set('date_to')}
+        sx={{ flex: '0 0 148px' }}
+        slotProps={{ inputLabel: { shrink: true } }}
+      />
 
-        <Grid item xs={6} sm={2}>
-          <TextField select size="small" label="Category" fullWidth value={filters.category ?? ''} onChange={set('category')}>
-            <MenuItem value="">All Categories</MenuItem>
-            {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
-          </TextField>
-        </Grid>
+      {/* Category — grows to fit category names */}
+      <TextField
+        select
+        size="small"
+        label="Category"
+        value={filters.category ?? ''}
+        onChange={set('category')}
+        sx={{ flex: '1 1 160px', minWidth: 140 }}
+      >
+        <MenuItem value="">All Categories</MenuItem>
+        {categories.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+      </TextField>
 
-        <Grid item xs={6} sm={2}>
-          <TextField select size="small" label="Payment" fullWidth value={filters.payment_method ?? ''} onChange={set('payment_method')}>
-            {PAYMENT_METHODS.map(m => <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>)}
-          </TextField>
-        </Grid>
-      </Grid>
+      {/* Payment method */}
+      <TextField
+        select
+        size="small"
+        label="Payment"
+        value={filters.payment_method ?? ''}
+        onChange={set('payment_method')}
+        sx={{ flex: '1 1 140px', minWidth: 130 }}
+      >
+        {PAYMENT_METHODS.map(m => <MenuItem key={m.value} value={m.value}>{m.label}</MenuItem>)}
+      </TextField>
     </Box>
   )
 }

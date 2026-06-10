@@ -36,5 +36,22 @@ services:
       sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # Points the Vite dev proxy at the backend service, not localhost
+      - API_TARGET=http://backend:8000
+    volumes:
+      # Hot reload: mount source; node_modules stays inside the container
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:

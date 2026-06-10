@@ -6,7 +6,7 @@ const formatCurrency = (v) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(v)
 
 export default function CategoryPieChart({ data }) {
-  const labels = data.map((d) => d.category)
+  const labels = data.map((d) => d.category_name)
   const values = data.map((d) => parseFloat(d.amount))
 
   const chartData = {
@@ -35,7 +35,7 @@ export default function CategoryPieChart({ data }) {
         callbacks: {
           label: (ctx) => {
             const item = data[ctx.dataIndex]
-            return ` ${formatCurrency(item.amount)} (${item.percentage.toFixed(1)}%)`
+            return ` ${formatCurrency(parseFloat(item.amount))} (${parseFloat(item.percentage).toFixed(1)}%)`
           },
         },
       },
