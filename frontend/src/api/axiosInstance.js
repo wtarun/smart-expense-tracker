@@ -1,7 +1,9 @@
 import axios from 'axios'
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
+
 const axiosInstance = axios.create({
-  baseURL: '/api/v1',
+  baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 })
 
@@ -52,7 +54,7 @@ axiosInstance.interceptors.response.use(
     }
 
     try {
-      const { data } = await axios.post('/api/v1/auth/token/refresh/', {
+      const { data } = await axios.post(`${BASE_URL}/auth/token/refresh/`, {
         refresh: refreshToken,
       })
       const newAccess = data.data.access
